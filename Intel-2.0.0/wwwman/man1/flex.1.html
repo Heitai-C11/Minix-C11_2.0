@@ -1,0 +1,538 @@
+<HTML>
+<HEAD>
+<TITLE>flex(1)</TITLE>
+</HEAD>
+<BODY>
+<H1>flex(1)</H1>
+<HR>
+<PRE>
+
+</PRE>
+<H2>NAME</H2><PRE>
+     flex, lex - fast lexical analyzer generator
+
+
+</PRE>
+<H2>SYNOPSIS</H2><PRE>
+     <STRONG>flex</STRONG> <STRONG>[</STRONG>-<STRONG>bcdfinpstvFILT8</STRONG> <STRONG>-C[efmF]</STRONG> <STRONG>-Sskeleton]</STRONG> [<EM>filename</EM> ...]
+
+
+</PRE>
+<H2>DESCRIPTION</H2><PRE>
+     <EM>flex</EM> is a tool for generating <EM>scanners</EM>: programs which recognized lexical
+     patterns  in  text.   <EM>flex</EM>  reads  the given input files, or its standard
+     input if no file names are given, for  a  description  of  a  scanner  to
+     generate.  The description is in the form of pairs of regular expressions
+     and C code, called <EM>rules</EM>. <EM>flex</EM> generates  as  output  a  C  source  file,
+     <STRONG>lex.yy.c,</STRONG>  which  defines  a  routine  <STRONG>yylex().</STRONG> This file is compiled and
+     linked with  the  <STRONG>-lfl</STRONG>  library  to  produce  an  executable.   When  the
+     executable  is  run, it analyzes its input for occurrences of the regular
+     expressions.  Whenever it finds one,  it  executes  the  corresponding  C
+     code.
+
+     For full documentation, see <STRONG>flexdoc(1).</STRONG> This manual entry is intended for
+     use as a quick reference.
+
+
+</PRE>
+<H2>OPTIONS</H2><PRE>
+     <EM>flex</EM> has the following options:
+
+     <STRONG>-b</STRONG>   Generate backtracking information to <EM>lex</EM>.<EM>backtrack</EM>. This is  a  list
+          of   scanner   states  which  require  backtracking  and  the  input
+          characters on which they do so.  By  adding  rules  one  can  remove
+          backtracking  states.  If all backtracking states are eliminated and
+          <STRONG>-f</STRONG> or <STRONG>-F</STRONG> is used, the generated scanner will run faster.
+
+     <STRONG>-c</STRONG>   is a do-nothing, deprecated option included for POSIX compliance.
+
+          <STRONG>NOTE:</STRONG> in previous releases of <EM>flex</EM>  <STRONG>-c</STRONG>  specified  table-compression
+          options.   This  functionality is now given by the <STRONG>-C</STRONG> flag.  To ease
+          the the impact of this change, when <EM>flex</EM> encounters <STRONG>-c,</STRONG> it currently
+          issues  a  warning  message and assumes that <STRONG>-C</STRONG> was desired instead.
+          In the future this "promotion" of <STRONG>-c</STRONG> to <STRONG>-C</STRONG> will go away in the  name
+          of  full  POSIX  compliance  (unless  the  POSIX  meaning is removed
+          first).
+
+     <STRONG>-d</STRONG>   makes the generated scanner run in <EM>debug</EM> mode.  Whenever  a  pattern
+          is recognized and the global <STRONG>yy_flex_debug</STRONG> is non-zero (which is the
+          default), the scanner will write to <EM>stderr</EM> a line of the form:
+
+              --accepting rule at line 53 ("the matched text")
+
+          The line number refers to the location  of  the  rule  in  the  file
+          defining  the  scanner  (i.e.,  the  file  that  was  fed  to flex).
+          Messages are also generated when the scanner backtracks, accepts the
+          default  rule,  reaches the end of its input buffer (or encounters a
+          NUL; the two look the same as far as the  scanner's  concerned),  or
+          reaches an end-of-file.
+
+     <STRONG>-f</STRONG>   specifies (take your pick) <EM>full</EM> <EM>table</EM>  or  <EM>fast</EM>  <EM>scanner</EM>.  No  table
+          compression  is done.  The result is large but fast.  This option is
+          equivalent to <STRONG>-Cf</STRONG> (see below).
+
+     <STRONG>-i</STRONG>   instructs <EM>flex</EM> to generate a <EM>case</EM>-<EM>insensitive</EM> scanner.  The case  of
+          letters given in the <EM>flex</EM> input patterns will be ignored, and tokens
+          in the input will be matched regardless of case.  The  matched  text
+          given  in  <EM>yytext</EM> will have the preserved case (i.e., it will not be
+          folded).
+
+     <STRONG>-n</STRONG>   is another do-nothing, deprecated option  included  only  for  POSIX
+          compliance.
+
+     <STRONG>-p</STRONG>   generates a performance report to stderr.  The  report  consists  of
+          comments  regarding features of the <EM>flex</EM> input file which will cause
+          a loss of performance in the resulting scanner.
+
+     <STRONG>-s</STRONG>   causes the <EM>default</EM> <EM>rule</EM> (that unmatched scanner input is  echoed  to
+          <EM>stdout</EM>) to be suppressed.  If the scanner encounters input that does
+          not match any of its rules, it aborts with an error.
+
+     <STRONG>-t</STRONG>   instructs <EM>flex</EM> to write the scanner it generates to standard  output
+          instead of <STRONG>lex.yy.c.</STRONG>
+
+     <STRONG>-v</STRONG>   specifies that <EM>flex</EM> should write to <EM>stderr</EM> a summary  of  statistics
+          regarding the scanner it generates.
+
+     <STRONG>-F</STRONG>   specifies that the <EM>fast</EM> scanner table representation should be used.
+          This   representation   is   about   as   fast  as  the  full  table
+          representation  (<STRONG>-f</STRONG>),  and  for  some  sets  of  patterns  will   be
+          considerably  smaller  (and for others, larger).  See <STRONG>flexdoc(1)</STRONG> for
+          details.
+
+          This option is equivalent to <STRONG>-CF</STRONG> (see below).
+
+     <STRONG>-I</STRONG>   instructs <EM>flex</EM> to  generate  an  <EM>interactive</EM>  scanner,  that  is,  a
+          scanner  which  stops  immediately  rather  than looking ahead if it
+          knows that the currently scanned text cannot be  part  of  a  longer
+          rule's match.  Again, see <STRONG>flexdoc(1)</STRONG> for details.
+
+          Note, <STRONG>-I</STRONG> cannot be used in conjunction with  <EM>full</EM>  or  <EM>fast</EM>  <EM>tables</EM>,
+          i.e., the <STRONG>-f,</STRONG> <STRONG>-F,</STRONG> <STRONG>-Cf,</STRONG> or <STRONG>-CF</STRONG> flags.
+
+     <STRONG>-L</STRONG>   instructs <EM>flex</EM> not to generate <STRONG>#line</STRONG>  directives  in  <STRONG>lex.yy.c.</STRONG>  The
+          default  is  to  generate  such  directives so error messages in the
+          actions will be correctly located with respect to the original  <EM>flex</EM>
+          input  file,  and  not  to  the  fairly  meaningless line numbers of
+          <STRONG>lex.yy.c.</STRONG>
+
+     <STRONG>-T</STRONG>   makes <EM>flex</EM> run in <EM>trace</EM> mode.  It will generate a lot of messages to
+          <EM>stdout</EM>  concerning  the  form  of  the  input and the resultant non-
+          deterministic and deterministic finite  automata.   This  option  is
+          mostly for use in maintaining <EM>flex</EM>.
+
+     <STRONG>-8</STRONG>   instructs <EM>flex</EM> to generate an 8-bit scanner.  On some sites, this is
+          the  default.   On  others, the default is 7-bit characters.  To see
+          which is the case, check the verbose <STRONG>(</STRONG>-<STRONG>v)</STRONG>  output  for  "equivalence
+          classes  created".   If  the denominator of the number shown is 128,
+          then by default <EM>flex</EM> is generating 7-bit characters.  If it is  256,
+          then the default is 8-bit characters.
+
+     <STRONG>-C[efmF]</STRONG>
+          controls the degree of table compression.
+
+          <STRONG>-Ce</STRONG> directs <EM>flex</EM> to construct <EM>equivalence</EM>  <EM>classes</EM>,  i.e.,  sets  of
+          characters  which  have  identical  lexical properties.  Equivalence
+          classes usually give dramatic reductions in the  final  table/object
+          file  sizes  (typically  a  factor  of  2-5)  and  are  pretty cheap
+          performance-wise (one array look-up per character scanned).
+
+          <STRONG>-Cf</STRONG> specifies that the <EM>full</EM> scanner tables  should  be  generated  -
+          <EM>flex</EM>  should not compress the tables by taking advantages of similar
+          transition functions for different states.
+
+          <STRONG>-CF</STRONG>  specifies  that  the  alternate  fast  scanner   representation
+          (described in <STRONG>flexdoc(1))</STRONG> should be used.
+
+          <STRONG>-Cm</STRONG> directs <EM>flex</EM> to construct <EM>meta</EM>-<EM>equivalence</EM>  <EM>classes</EM>,  which  are
+          sets  of  equivalence classes (or characters, if equivalence classes
+          are  not  being  used)  that  are  commonly  used  together.   Meta-
+          equivalence  classes  are  often  a  big  win  when using compressed
+          tables, but they have a moderate performance impact (one or two "if"
+          tests and one array look-up per character scanned).
+
+          A lone <STRONG>-C</STRONG> specifies that the scanner tables should be compressed but
+          neither  equivalence  classes nor meta-equivalence classes should be
+          used.
+
+          The options <STRONG>-Cf</STRONG> or <STRONG>-CF</STRONG> and <STRONG>-Cm</STRONG> do not make sense together - there is
+          no  opportunity  for  meta-equivalence  classes  if the table is not
+          being compressed.  Otherwise the options may be freely mixed.
+
+          The default setting  is  <STRONG>-Cem,</STRONG>  which  specifies  that  <EM>flex</EM>  should
+          generate  equivalence  classes  and  meta-equivalence classes.  This
+          setting provides the highest degree of table compression.   You  can
+          trade  off  faster-executing  scanners  at the cost of larger tables
+          with the following generally being true:
+              slowest &amp; smallest
+                    -Cem
+                    -Cm
+                    -Ce
+                    -C
+                    -C{f,F}e
+                    -C{f,F}
+              fastest &amp; largest
+
+
+          <STRONG>-C</STRONG> options are not cumulative; whenever the flag is encountered, the
+          previous -C settings are forgotten.
+
+     <STRONG>-Sskeleton_file</STRONG>
+          overrides the default skeleton file from which <EM>flex</EM>  constructs  its
+          scanners.   You'll  never need this option unless you are doing <EM>flex</EM>
+          maintenance or development.
+
+
+</PRE>
+<H2>SUMMARY OF FLEX REGULAR EXPRESSIONS</H2><PRE>
+     The patterns in the input are written using an extended  set  of  regular
+     expressions.  These are:
+
+         x          match the character 'x'
+         .          any character except newline
+         [xyz]      a "character class"; in this case, the pattern
+                      matches either an 'x', a 'y', or a 'z'
+         [abj-oZ]   a "character class" with a range in it; matches
+                      an 'a', a 'b', any letter from 'j' through 'o',
+                      or a 'Z'
+         [^A-Z]     a "negated character class", i.e., any character
+                      but those in the class.  In this case, any
+                      character EXCEPT an uppercase letter.
+         [^A-Z\n]   any character EXCEPT an uppercase letter or
+                      a newline
+         r*         zero or more r's, where r is any regular expression
+         r+         one or more r's
+         r?         zero or one r's (that is, "an optional r")
+         r{2,5}     anywhere from two to five r's
+         r{2,}      two or more r's
+         r{4}       exactly 4 r's
+         {name}     the expansion of the "name" definition
+                    (see above)
+         "[xyz]\"foo"
+                    the literal string: [xyz]"foo
+         \X         if X is an 'a', 'b', 'f', 'n', 'r', 't', or 'v',
+                      then the ANSI-C interpretation of \x.
+                      Otherwise, a literal 'X' (used to escape
+                      operators such as '*')
+         \123       the character with octal value 123
+         \x2a       the character with hexadecimal value 2a
+         (r)        match an r; parentheses are used to override
+                      precedence (see below)
+
+
+         rs         the regular expression r followed by the
+                      regular expression s; called "concatenation"
+
+
+         r|s        either an r or an s
+
+
+         r/s        an r but only if it is followed by an s.  The
+                      s is not part of the matched text.  This type
+                      of pattern is called as "trailing context".
+         ^r         an r, but only at the beginning of a line
+         r$         an r, but only at the end of a line.  Equivalent
+                      to "r/\n".
+
+
+         &lt;s&gt;r       an r, but only in start condition s (see
+                    below for discussion of start conditions)
+         &lt;s1,s2,s3&gt;r
+                    same, but in any of start conditions s1,
+                    s2, or s3
+
+
+         &lt;&lt;EOF&gt;&gt;    an end-of-file
+         &lt;s1,s2&gt;&lt;&lt;EOF&gt;&gt;
+                    an end-of-file when in start condition s1 or s2
+
+     The regular expressions listed above are grouped according to precedence,
+     from  highest  precedence  at  the  top  to  lowest at the bottom.  Those
+     grouped together have equal precedence.
+
+     Some notes on patterns:
+
+     -    Negated  character  classes  <EM>match</EM>  <EM>newlines</EM>  unless  "\n"  (or   an
+          equivalent  escape  sequence)  is  one  of the characters explicitly
+          present in the negated character class (e.g., "[^A-Z\n]").
+
+     -    A rule can have at most one instance of trailing  context  (the  '/'
+          operator  or  the  '$'  operator).   The  start  condition, '^', and
+          "&lt;&lt;EOF&gt;&gt;" patterns can only occur at the  beginning  of  a  pattern,
+          and,  as  well  as  with  '/'  and  '$',  cannot  be  grouped inside
+          parentheses.  The following are all illegal:
+
+              foo/bar$
+              foo|(bar$)
+              foo|^bar
+              &lt;sc1&gt;foo&lt;sc2&gt;bar
+
+
+</PRE>
+<H2>SUMMARY OF SPECIAL ACTIONS</H2><PRE>
+     In addition to arbitrary C code, the following can appear in actions:
+
+     -    <STRONG>ECHO</STRONG> copies yytext to the scanner's output.
+
+     -    <STRONG>BEGIN</STRONG> followed by the name of a start condition places  the  scanner
+          in the corresponding start condition.
+
+     -    <STRONG>REJECT</STRONG> directs the scanner to proceed on to the "second  best"  rule
+          which  matched  the  input  (or  a prefix of the input).  <STRONG>yytext</STRONG> and
+          <STRONG>yyleng</STRONG> are set up appropriately.  Note that <STRONG>REJECT</STRONG> is a particularly
+          expensive feature in terms scanner performance; if it is used in <EM>any</EM>
+          of the scanner's actions it will slow  down  <EM>all</EM>  of  the  scanner's
+          matching.   Furthermore,  <STRONG>REJECT</STRONG>  cannot  be  used with the -<EM>f</EM> or -<EM>F</EM>
+          options.
+
+          Note also that unlike the other special actions, <STRONG>REJECT</STRONG> is a <EM>branch</EM>;
+          code immediately following it in the action will <EM>not</EM> be executed.
+
+     -    <STRONG>yymore()</STRONG> tells the scanner that the next time it matches a rule, the
+          corresponding  token  should  be  <EM>appended</EM> onto the current value of
+          <STRONG>yytext</STRONG> rather than replacing it.
+
+     -    <STRONG>yyless(n)</STRONG> returns all but the first  <EM>n</EM>  characters  of  the  current
+          token  back  to  the input stream, where they will be rescanned when
+          the scanner looks  for  the  next  match.   <STRONG>yytext</STRONG>  and  <STRONG>yyleng</STRONG>  are
+          adjusted appropriately (e.g., <STRONG>yyleng</STRONG> will now be equal to <EM>n</EM> ).
+
+     -    <STRONG>unput(c)</STRONG> puts the character <EM>c</EM> back onto the input stream.   It  will
+          be the next character scanned.
+
+     -    <STRONG>input()</STRONG> reads the next character from the input stream (this routine
+          is called <STRONG>yyinput()</STRONG> if the scanner is compiled using <STRONG>C++).</STRONG>
+
+     -    <STRONG>yyterminate()</STRONG> can be used in  lieu  of  a  return  statement  in  an
+          action.   It terminates the scanner and returns a 0 to the scanner's
+          caller, indicating "all done".
+
+          By default, <STRONG>yyterminate()</STRONG> is also  called  when  an  end-of-file  is
+          encountered.  It is a macro and may be redefined.
+
+     -    <STRONG>YY_NEW_FILE</STRONG> is an action available only in &lt;&lt;EOF&gt;&gt; rules.  It  means
+          "Okay, I've set up a new input file, continue scanning".
+
+     -    <STRONG>yy_create_buffer(</STRONG> <STRONG>file,</STRONG> <STRONG>size</STRONG> <STRONG>)</STRONG> takes a <EM>FILE</EM> pointer and  an  integer
+          <EM>size</EM>.  It  returns  a  YY_BUFFER_STATE  handle to a new input buffer
+          large enough to accomodate <EM>size</EM> characters and associated  with  the
+          given file.  When in doubt, use <STRONG>YY_BUF_SIZE</STRONG> for the size.
+
+
+     -    <STRONG>yy_switch_to_buffer(</STRONG> <STRONG>new_buffer</STRONG> <STRONG>)</STRONG> switches the scanner's  processing
+          to  scan  for  tokens  from  the  given  buffer,  which  must  be  a
+          YY_BUFFER_STATE.
+
+     -    <STRONG>yy_delete_buffer(</STRONG> <STRONG>buffer</STRONG> <STRONG>)</STRONG> deletes the given buffer.
+
+
+</PRE>
+<H2>VALUES AVAILABLE TO THE USER</H2><PRE>
+
+     -    <STRONG>char</STRONG> <STRONG>*yytext</STRONG> holds the text of the current token.   It  may  not  be
+          modified.
+
+     -    <STRONG>int</STRONG> <STRONG>yyleng</STRONG> holds the length of the current token.   It  may  not  be
+          modified.
+
+     -    <STRONG>FILE</STRONG> <STRONG>*yyin</STRONG> is the file which by default <EM>flex</EM> reads from.  It may  be
+          redefined  but  doing  so  only  makes sense before scanning begins.
+          Changing it in the middle of scanning will have  unexpected  results
+          since  <EM>flex</EM>  buffers its input.  Once scanning terminates because an
+          end-of-file has been seen, <STRONG>void</STRONG> <STRONG>yyrestart(</STRONG> <STRONG>FILE</STRONG> <STRONG>*new_file</STRONG> <STRONG>)</STRONG>  may  be
+          called to point <EM>yyin</EM> at the new input file.
+
+     -    <STRONG>FILE</STRONG> <STRONG>*yyout</STRONG> is the file to which <STRONG>ECHO</STRONG> actions are done.  It  can  be
+          reassigned by the user.
+
+     -    <STRONG>YY_CURRENT_BUFFER</STRONG> returns a <STRONG>YY_BUFFER_STATE</STRONG> handle  to  the  current
+          buffer.
+
+
+</PRE>
+<H2>MACROS THE USER CAN REDEFINE</H2><PRE>
+
+     -    <STRONG>YY_DECL</STRONG> controls how the scanning routine is declared.  By  default,
+          it  is  "int  yylex()",  or,  if  prototypes  are  being  used, "int
+          yylex(void)".  This definition may  be  changed  by  redefining  the
+          "YY_DECL"  macro.   Note  that if you give arguments to the scanning
+          routine using a K&amp;R-style/non-prototyped function  declaration,  you
+          must terminate the definition with a semi-colon (;).
+
+     -    The nature of how the scanner gets its input can  be  controlled  by
+          redefining  the  <STRONG>YY_INPUT</STRONG>  macro.   YY_INPUT's  calling  sequence is
+          "YY_INPUT(buf,result,max_size)".  Its  action  is  to  place  up  to
+          <EM>max</EM>_<EM>size</EM>  characters  in  the  character array <EM>buf</EM> and return in the
+          integer variable <EM>result</EM> either the number of characters read or  the
+          constant  YY_NULL  (0 on Unix systems) to indicate EOF.  The default
+          YY_INPUT reads  from  the  global  file-pointer  "yyin".   A  sample
+          redefinition  of  YY_INPUT  (in the definitions section of the input
+          file):
+
+              %{
+              #undef YY_INPUT
+              #define YY_INPUT(buf,result,max_size) \
+                  { \
+                  int c = getchar(); \
+                  result = (c == EOF) ? YY_NULL : (buf[0] = c, 1); \
+                  }
+              %}
+
+
+     -    When the scanner receives an end-of-file indication  from  YY_INPUT,
+          it  then  checks  the  <STRONG>yywrap()</STRONG> function.  If <STRONG>yywrap()</STRONG> returns false
+          (zero), then it is assumed that the function has gone ahead and  set
+          up  <EM>yyin</EM> to point to another input file, and scanning continues.  If
+          it returns true (non-zero), then the scanner terminates, returning 0
+          to its caller.
+
+          The default <STRONG>yywrap()</STRONG> always returns 1.  Presently,  to  redefine  it
+          you  must first "#undef yywrap", as it is currently implemented as a
+          macro.  It is likely that <STRONG>yywrap()</STRONG> will soon  be  defined  to  be  a
+          function rather than a macro.
+
+     -    YY_USER_ACTION can be redefined to provide an action which is always
+          executed prior to the matched rule's action.
+
+     -    The macro <STRONG>YY_USER_INIT</STRONG> may be redefined to provide an  action  which
+          is always executed before the first scan.
+
+     -    In the generated scanner, the actions are all gathered in one  large
+          switch   statement  and  separated  using  <STRONG>YY_BREAK,</STRONG>  which  may  be
+          redefined.  By default, it is simply a  "break",  to  separate  each
+          rule's action from the following rule's.
+
+
+</PRE>
+<H2>FILES</H2><PRE>
+
+     <EM>flex</EM>.<EM>skel</EM>
+          skeleton scanner.
+
+     <EM>lex</EM>.<EM>yy</EM>.<EM>c</EM>
+          generated scanner (called <EM>lexyy</EM>.<EM>c</EM> on some systems).
+
+     <EM>lex</EM>.<EM>backtrack</EM>
+          backtracking  information  for  <STRONG>-b</STRONG>  flag  (called  <EM>lex</EM>.<EM>bck</EM>  on  some
+          systems).
+
+     <STRONG>-lfl</STRONG> library with which to link the scanners.
+
+
+</PRE>
+<H2>SEE ALSO</H2><PRE>
+
+     <STRONG><A HREF="../man1/flexdoc.1.html">flexdoc(1)</A></STRONG>, <STRONG><A HREF="../man1/lex.1.html">lex(1)</A></STRONG>, <STRONG><A HREF="../man1/yacc.1.html">yacc(1)</A></STRONG>, <STRONG><A HREF="../man1/sed.1.html">sed(1)</A></STRONG>, <STRONG><A HREF="../man1/awk.1.html">awk(1)</A></STRONG>.
+
+     M. E. Lesk and E. Schmidt, <EM>LEX</EM> - <EM>Lexical</EM> <EM>Analyzer</EM> <EM>Generator</EM>
+
+
+
+</PRE>
+<H2>DIAGNOSTICS</H2><PRE>
+     <EM>reject</EM>_<EM>used</EM>_<EM>but</EM>_<EM>not</EM>_<EM>detected</EM> <EM>undefined</EM> or
+
+     <EM>yymore</EM>_<EM>used</EM>_<EM>but</EM>_<EM>not</EM>_<EM>detected</EM>  <EM>undefined</EM>  -  These  errors  can  occur  at
+     compile time.  They indicate that the scanner uses <STRONG>REJECT</STRONG> or <STRONG>yymore()</STRONG> but
+     that <EM>flex</EM> failed to notice the fact, meaning that <EM>flex</EM> scanned the  first
+     two  sections looking for occurrences of these actions and failed to find
+     any, but somehow you snuck some in (via a #include  file,  for  example).
+     Make  an explicit reference to the action in your <EM>flex</EM> input file.  (Note
+     that previously <EM>flex</EM> supported a <STRONG>%used/%unused</STRONG> mechanism for dealing with
+     this  problem;  this  feature  is still supported but now deprecated, and
+     will go away soon unless the author  hears  from  people  who  can  argue
+     compellingly that they need it.)
+
+     <EM>flex</EM> <EM>scanner</EM> <EM>jammed</EM> - a scanner compiled with <STRONG>-s</STRONG> has encountered an input
+     string which wasn't matched by any of its rules.
+
+     <EM>flex</EM> <EM>input</EM> <EM>buffer</EM> <EM>overflowed</EM> - a  scanner  rule  matched  a  string  long
+     enough  to  overflow  the  scanner's  internal  input buffer (16K bytes -
+     controlled by <STRONG>YY_BUF_MAX</STRONG> in "flex.skel").
+
+     <EM>scanner</EM>  <EM>requires</EM>  -<EM>8</EM>  <EM>flag</EM>  -  Your   scanner   specification   includes
+     recognizing  8-bit  characters  and  you did not specify the -8 flag (and
+     your site has not installed flex with -8 as the default).
+
+     <EM>fatal</EM> <EM>flex</EM> <EM>scanner</EM> <EM>internal</EM> <EM>error</EM>--<EM>end</EM> <EM>of</EM> <EM>buffer</EM> <EM>missed</EM> - This can  occur
+     in  an  scanner  which  is reentered after a long-jump has jumped out (or
+     over) the scanner's activation frame.   Before  reentering  the  scanner,
+     use:
+
+         yyrestart( yyin );
+
+
+     <EM>too</EM> <EM>many</EM> %<EM>t</EM> <EM>classes</EM>! - You managed to put every single character into its
+     own  %t  class.   <EM>flex</EM>  requires  that  at least one of the classes share
+     characters.
+
+
+</PRE>
+<H2>AUTHOR</H2><PRE>
+     Vern Paxson, with the help of many ideas and much  inspiration  from  Van
+     Jacobson.  Original version by Jef Poskanzer.
+
+     See <STRONG><A HREF="../man1/flexdoc.1.html">flexdoc(1)</A></STRONG> for additional credits and the address  to  send  comments
+     to.
+
+
+</PRE>
+<H2>DEFICIENCIES / BUGS</H2><PRE>
+
+     Some trailing context patterns cannot be properly  matched  and  generate
+     warning  messages  ("Dangerous  trailing  context").   These are patterns
+     where the ending of the first part of the rule matches the  beginning  of
+     the second part, such as "zx*/xy*", where the 'x*' matches the 'x' at the
+     beginning of the trailing context.  (Note that  the  POSIX  draft  states
+     that the text matched by such patterns is undefined.)
+
+     For some trailing context rules, parts which  are  actually  fixed-length
+     are  not  recognized  as  such, leading to the abovementioned performance
+     loss.  In particular, parts using '|'  or  {n}  (such  as  "foo{3}")  are
+     always considered variable-length.
+
+     Combining trailing context with the special  '|'  action  can  result  in
+     <EM>fixed</EM>  trailing  context  being  turned  into the more expensive <EM>variable</EM>
+     trailing context.  For example, this happens in the following example:
+
+         %%
+         abc      |
+         xyz/def
+
+
+     Use of unput() invalidates yytext and yyleng.
+
+     Use of unput() to push back more text than was matched can result in  the
+     pushed-back  text  matching a beginning-of-line ('^') rule even though it
+     didn't come at the beginning of the line (though this is rare!).
+
+     Pattern-matching of NUL's is substantially  slower  than  matching  other
+     characters.
+
+     <EM>flex</EM> does not generate correct #line directives for code internal to  the
+     scanner; thus, bugs in <EM>flex</EM>.<EM>skel</EM> yield bogus line numbers.
+
+     Due to both buffering of input and read-ahead, you cannot intermix  calls
+     to  &lt;stdio.h&gt;  routines, such as, for example, <STRONG>getchar(),</STRONG> with <EM>flex</EM> rules
+     and expect it to work.  Call <STRONG>input()</STRONG> instead.
+
+     The total table entries listed by the <STRONG>-v</STRONG>  flag  excludes  the  number  of
+     table entries needed to determine what rule has been matched.  The number
+     of entries is equal to the number of DFA states if the scanner  does  not
+     use <STRONG>REJECT,</STRONG> and somewhat greater than the number of states if it does.
+
+     <STRONG>REJECT</STRONG> cannot be used with the -<EM>f</EM> or -<EM>F</EM> options.
+
+     Some of the macros, such as <STRONG>yywrap(),</STRONG> may in the future become  functions
+     which live in the <STRONG>-lfl</STRONG> library.  This will doubtless break a lot of code,
+     but may be required for POSIX-compliance.
+
+     The <EM>flex</EM> internal algorithms need documentation.
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

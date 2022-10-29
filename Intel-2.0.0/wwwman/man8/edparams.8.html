@@ -1,0 +1,384 @@
+<HTML>
+<HEAD>
+<TITLE>monitor(8)</TITLE>
+</HEAD>
+<BODY>
+<H1>monitor(8)</H1>
+<HR>
+<PRE>
+
+</PRE>
+<H2>NAME</H2><PRE>
+     monitor, edparams - load and start Minix, modify boot parameters
+
+
+</PRE>
+<H2>SYNOPSIS</H2><PRE>
+     <STRONG>edparams</STRONG> <EM>device</EM> [<STRONG>command</STRONG> ...]
+     <STRONG>boot.com</STRONG> <EM>virdisk</EM>
+
+
+</PRE>
+<H2>DESCRIPTION</H2><PRE>
+     This text describes the Boot Monitor, a  boot  time  interactive  program
+     designed  not  only to load and start Minix, its most important task, but
+     to also provide an easy to use interface to configure Minix and  to  boot
+     other operating systems.
+
+     The monitor is controlled with an environment that is modeled  after  the
+     Bourne  shell.  This environment is filled at startup with default values
+     that depend on the machine the monitor is running on and the  environment
+     settings  saved  into  the boot parameters sector (the second sector on a
+     device).  When the  environment  is  loaded,  the  monitor  executes  the
+     function named <STRONG>main</STRONG>, which by default starts a simple menu.
+
+     The environment can be manipulated at boot time from the monitor  prompt,
+     but  may  also  be  edited  using  <STRONG>edparams</STRONG>  on a given device.  <STRONG>Edparams</STRONG>
+     simulates the monitor as much  as  it  can,  echoing  commands  it  can't
+     execute  between  brackets.  It can also be used in Makefiles and scripts
+     by giving it commands as arguments.
+
+     The MS-DOS version of the monitor,  usually  named  <STRONG>boot.com</STRONG>  under  DOS,
+     boots Minix from a "DOS virtual disk".  (See below.)
+
+
+</PRE>
+<H2>COMMANDS</H2><PRE>
+     The monitor is best described by the commands you can  type  to  the  '&gt;'
+     prompt.  This is known as the "monitor mode".  You can enter this mode by
+     hitting the Escape key.  These are the monitor commands:
+
+     <EM>name</EM> = [<STRONG>device</STRONG>] <EM>value</EM>
+
+          Set environment variable.
+          Changes the value of <EM>name</EM> to <EM>value</EM>.  The optional word <STRONG>device</STRONG>  marks
+          <EM>name</EM>  as  being  subject to device translation.  (See the section on
+          devices.)  These (name, value) pairs are passed to  the  kernel  who
+          uses  them  to  configure  itself.   These  variables  are passed by
+          default:
+
+          <STRONG>rootdev</STRONG>
+               This is the device used as your root device.  It is by  default
+               set   to   <STRONG>ram,</STRONG>  which  means  that  the  device  specified  by
+               <STRONG>ramimagedev</STRONG> will be loaded into the RAM disk and used as  root.
+               If you change this variable then a physical device will be used
+               as root, and the RAM disk will be uninitialized  and  have  the
+               size specified by <STRONG>ramsize</STRONG>.
+
+          <STRONG>ramimagedev</STRONG>
+               Describes the device to use  to  initialize  the  RAM  disk  if
+               <STRONG>rootdev</STRONG>  is  set  to  <STRONG>ram</STRONG>.   It's  by default set to <STRONG>bootdev</STRONG>, a
+               special name for the device the monitor booted from.
+
+          <STRONG>ramsize</STRONG>
+               The size of the RAM disk.  If the RAM disk is used for the root
+               file  system  then  the  root  file  system is stretched out to
+               <STRONG>ramsize</STRONG> if possible.
+
+          <STRONG>processor</STRONG>
+               Set by default to <STRONG>86</STRONG>, <STRONG>186</STRONG>, <STRONG>286</STRONG>, <STRONG>386</STRONG>, <STRONG>486</STRONG>, ...  depending on the
+               hardware  you  have.  You can set it to a smaller value to test
+               your kernel in a more limited environment.
+
+          <STRONG>bus</STRONG>
+               The type of system bus, either <STRONG>xt</STRONG>, <STRONG>at</STRONG>  or  <STRONG>mca</STRONG>.   This  answers
+               basic  questions  like: "How many interrupt controllers and how
+               to initialize?"  Or: "Does the keyboard have LEDs?"
+
+          <STRONG>memsize</STRONG>
+               Kilobytes of conventional memory.  This is the  amount  of  RAM
+               within the first megabyte.
+
+          <STRONG>emssize</STRONG>
+               Kilobytes of extended memory.
+
+          <STRONG>video</STRONG>
+               Describes capabilities of the VDU:  <STRONG>mda</STRONG>, <STRONG>cga</STRONG>, <STRONG>ega</STRONG> or <STRONG>vga</STRONG>.
+
+          <STRONG>chrome</STRONG>
+               Either <STRONG>color</STRONG> or <STRONG>mono</STRONG>.
+
+          <STRONG>console</STRONG>
+               If set to a hexadecimal value makes the monitor  set  the  BIOS
+               video  mode  to this value.  This allows the use of video modes
+               with more rows or colums than the  standard  80x25  mode.   The
+               kernel  must  of  course  be able to handle a nonstandard mode.
+               More parameters may follow the mode number.  <STRONG>Warning:</STRONG>  Not  all
+               monitors  can  handle  all  of  the  modes,  some  may generate
+               frequencies that can damage your monitor.  Read the  manual  of
+               card and monitor for details.
+
+          Two variables are only used by the monitor,  even  though  they  are
+          passed to the kernel too:
+
+          <STRONG>image</STRONG>
+               The name of the file containing the kernel  image,  by  default
+               <STRONG>minix</STRONG>.   If  it  refers  to a directory however then the newest
+               file inside the directory is chosen to  be  the  kernel  image.
+               The names inside <STRONG>/minix/</STRONG> are best set to the Minix version  you
+               are  using,  which looks good when the monitor prints its name.
+               Rules for pretty printing image names:
+
+                    A '/' or '_' is changed to a space.
+
+                    The first letter is changed from lowercase to uppercase.
+
+                    An 'r' if followed by a digit changes to " revision ".
+
+          <STRONG>label</STRONG>
+               If set then only processes marked with this label or without  a
+               label are loaded from the image.
+
+          <STRONG>Installboot</STRONG> <STRONG>-boot</STRONG> will create functions to select images and labels.
+          These functions will set label and image and echo what you selected.
+          The two numbers separated by a colon used as an image name tell  the
+          starting sector and sector count of the image on disk.
+
+     <EM>name</EM>() { ... }
+          Define function.
+          Functions may be used to bundle a set of commands, so that  you  can
+          easily  boot  Minix  with a different set of parameters then normal.
+          E.g.
+
+               ram() { rootdev=ram; boot }
+
+          will allow you to run Minix with  the  root  device  on  RAM  for  a
+          change, if you normally use a real device as root.  The only pre-set
+          function is <STRONG>main</STRONG> with default  value  <STRONG>menu</STRONG>,  which  is  the  default
+          command executed by the monitor.  You can use newlines after the ')'
+          token, the monitor will then use a '+' prompt and ask for the rest.
+
+     <EM>name</EM>(<EM>key</EM>) { ... }
+          Define kernel selecting function.
+          The menu command uses functions like these to add  menu  entries  to
+          select  a  different  kernel  from  a  boot disk.  <STRONG>Installboot</STRONG> <STRONG>-boot</STRONG>
+          produces these functions when the images are labeled.  The label  <STRONG>AT</STRONG>
+          would give:
+
+               AT(a) {label=AT;image=42:626;echo AT kernel selected;menu}
+
+          With the menu option:
+
+               a       Select AT kernel
+
+          Typing <STRONG>a</STRONG> will then execute the <STRONG>AT</STRONG> function above.
+
+     <EM>name</EM>(<EM>key</EM>,<EM>text</EM>) { ... }
+          User defined menu option.
+          This variant may be used to make any menu entry you like:
+
+               dos(d,Boot MS-DOS) { boot hd1 }
+
+          <EM>Text</EM> may be anything, even parentheses if they match.
+
+     <EM>name</EM>
+          Call function.
+          If <EM>name</EM> is a user defined function then its value  is  expanded  and
+          executed  in  place  of  <EM>name</EM>.   Try  a  recursive  one  like 'rec()
+          {rec;xx}' one day.  You can see the monitor run out  of  space  with
+          nice messages about using <STRONG><A HREF="../man1/chmem.1.html">chmem(1)</A></STRONG> to increase it's heap.
+
+     <STRONG>boot</STRONG> [<STRONG>-</STRONG><EM>opts</EM>]
+     <STRONG>boot</STRONG> <EM>device</EM>
+          Boot Minix or another O.S.
+          Without an argument, <STRONG>boot</STRONG> will load  and  execute  the  Minix  image
+          named  by the <STRONG>image</STRONG> variable.  With options the variable <STRONG>bootopts</STRONG> is
+          first set to <STRONG>-</STRONG><EM>opts</EM> before Minix is started,  and  unset  when  Minix
+          returns.   With  a  <EM>device</EM>  argument,  <STRONG>boot</STRONG> loads the boot sector of
+          <EM>device</EM> into memory and  jumps  to  it,  starting  another  operating
+          system.   You  would  normally use partitions on the first hard disk
+          for this command (hd[1-4]), using hd0 will also work  (choosing  the
+          active  partition).   One  can  also boot devices on the second hard
+          disk (hd[5-9]) if the bootstrap writer did  not  hardwire  the  disk
+          number to disk 0.
+          Some Operating Systems can only be booted from the active partition,
+          if  you  use  a '*', e.g.  <STRONG>boot</STRONG> <STRONG>*hd3</STRONG>, then partition 3 is first made
+          active.  You'll then need to use <STRONG>installboot</STRONG> <STRONG>-master</STRONG> with a fix  key
+          to forcefully boot the Minix partition at startup.
+
+     <STRONG>delay</STRONG> [<EM>msec</EM>]
+          Delay (500 msec default).
+          Fast booting speed was one of the objectives when this  program  was
+          created,  so  a  hard  disk  boot usually takes only a fraction of a
+          second.  If you need some time (to  hit  Escape,  or  stare  at  the
+          numbers) you can use <STRONG>delay</STRONG> to make the monitor pause for a specified
+          amount of time.  To specify a delay just before  Minix  is  started,
+          you  can  set  the  variable  <STRONG>delay</STRONG>  to  a  number  of milliseconds.
+          Example:
+
+               main() {delay 250; delay=500; boot}
+
+          Look at this carefully, 'delay 250'  means:  "wait  1/4  sec  now!",
+          while 'delay=500' means: "wait 1/2 sec after loading Minix".
+
+          If you use <STRONG>delay=swap</STRONG> then the monitor  will  wait  until  you  have
+          inserted a root diskette and typed RETURN.
+
+     <STRONG>echo</STRONG> <EM>word</EM> ...
+          Print these words.
+          Used to tell you that you just selected image X.
+
+     <STRONG>ls</STRONG> [<EM>directory</EM>]
+          List contents of a directory.
+          Useful when looking for kernel images.
+
+     <STRONG>menu</STRONG>
+          Menu driven startup.
+          This command allows you to execute functions defined with a <EM>key</EM>.  If
+          no  menu  functions  have  been  defined then <STRONG>menu</STRONG> will use this one
+          hidden built-in function:
+
+               *(=,Start Minix) { boot }
+
+          Kernel selecting functions only add new options to this set, but  if
+          you define a two argument function yourself then the above one is no
+          longer shown, allowing you to customize the menu  completely.   Your
+          first function definition should therefore be one that starts Minix.
+
+          Menu entries are shown in the same order as <STRONG>set</STRONG> shows them.  If  you
+          don't like the order then you have to unset the functions and retype
+          them in the proper order.
+
+          If you  type  a  key  then  a  scheduled  trap  is  killed  and  the
+          appropriate  menu  function  is  executed.  If you need more time to
+          choose then hit the spacebar.  A key not on the menu  also  kills  a
+          trap, but does nothing more.
+
+     <STRONG>save</STRONG>
+          Save environment.
+          This will save all the  environment  variables  and  functions  with
+          nondefault  values to the parameter sector (the second sector on the
+          boot device), so they are automatically set the next time  you  boot
+          the monitor.
+
+     <STRONG>set</STRONG>
+          Show environment.
+          Show the current values of the environment variables and  functions.
+          Default  values  are  shown  between parentheses to distinguish them
+          from values that were explicitly set.
+
+     <STRONG>trap</STRONG> <EM>msec</EM> <EM>command</EM>
+          Schedule command.
+          Schedules a command to be executed after  <EM>msec</EM>  milliseconds.   Only
+          the  monitor  mode cannot be interrupted, a scheduled trap is killed
+          when the prompt is printed.  Example:
+
+               main() {trap 10000 boot; menu}
+
+          This gives you 10 seconds to choose a menu option  before  Minix  is
+          booted.
+
+     <STRONG>unset</STRONG> <EM>name</EM> ...
+          Unset environment variables.
+          Removes the named variables and functions from the environment,  and
+          sets  special  variables back to their default values.  This is also
+          the only way to remove the "device name translation" property from a
+          variable.
+
+     <STRONG>exit</STRONG>
+          Exit the monitor
+          Reboot the machine, exit to Minix or exit to DOS as appropriate.
+
+
+</PRE>
+<H2>DEVICES</H2><PRE>
+     The Minix kernel can't do anything with device names, so they have to  be
+     translated  to device numbers before they are passed to the kernel.  This
+     number is found under the st_rdev field (see <STRONG><A HREF="../man2/stat.2.html">stat(2)</A></STRONG>) of the file on  the
+     boot  file  system.   The  monitor will look for the device file with the
+     working directory set to '/dev'.  If it can't find the device  name  then
+     it  will  translate  names like 'ram', 'fd1', 'hd6', 'hd3a', and 'sd2' to
+     what it itself thinks the numbers should be.
+
+     The special name <STRONG>bootdev</STRONG> is translated to the name of the  device  booted
+     from, like 'fd0', or 'hd3', and then searched for in /dev.  <STRONG>Bootdev</STRONG> can't
+     be translated to a device other then  the  fd  or  hd  devices,  so  SCSI
+     devices for instance must be named explicitly.
+
+
+</PRE>
+<H2>EXTENSIONS</H2><PRE>
+     A few extensions have been made to this program for kernel hackers.  They
+     may  be triggered by setting bits in the flags word in the kernel startup
+     code (the mpx file.)  The flag bits are:
+
+     0x0001    Call kernel in 386 mode.
+
+     0x0002    Do not make space for the bss areas of processes other then the
+               kernel.
+
+     0x0004    Use the stack size set by <STRONG><A HREF="../man1/chmem.1.html">chmem(1)</A></STRONG>.
+
+     0x0008    Load MM, FS, etc. into extended memory.
+
+     0x0010    No need to patch process sizes into the kernel.
+
+     0x0020    The kernel can return to the monitor on halt or reboot.
+
+
+
+
+
+
+</PRE>
+<H2>MS-DOS MONITOR</H2><PRE>
+     Minix-vmd has a version of the monitor that runs under MS-DOS to  boot  a
+     "DOS virtual disk".  It is a simple COM program that interprets an MS-DOS
+     file as a disk, loads a Minix kernel from the  active  partition  in  the
+     same  way as the BIOS based monitor, and executes it to start Minix.  All
+     the monitor commands function in  the  same  way,  except  for  the  <STRONG>boot</STRONG>
+     command,  it  can  only load Minix.  The memory that MS-DOS has in use is
+     copied out of the way when Minix takes control, and is put back in  place
+     when  Minix exits.  This memory shuffling also happens when the BIOS disk
+     driver makes BIOS calls, slowing things to a crawl.  It is better to  use
+     a  Minix  driver.   The MS-DOS monitor does not work if there is a memory
+     manager active that runs in 386 protected mode, like EMM386.
+
+
+</PRE>
+<H2>SEE ALSO</H2><PRE>
+     <STRONG><A HREF="../man1/chmem.1.html">chmem(1)</A></STRONG>, <STRONG><A HREF="../man2/stat.2.html">stat(2)</A></STRONG>, <STRONG><A HREF="../man8/installboot.8.html">installboot(8)</A></STRONG>, <STRONG><A HREF="../man8/usage.8.html">usage(8)</A></STRONG>, <STRONG><A HREF="../man8/boot.8.html">boot(8)</A></STRONG>.
+
+
+</PRE>
+<H2>BUGS</H2><PRE>
+     The <STRONG>delay</STRONG> command will hang forever on the original IBM PC (not the XT!).
+     Not that it matters, as everything takes forever on that box.
+
+     Reading the first sector to boot a floppy (e.g.  <STRONG>boot</STRONG> <STRONG>fd1</STRONG>), is done using
+     whatever  floppy  parameters  boot  currently  has  available.  This will
+     probably always work.
+
+     The two forms of <STRONG>delay</STRONG> are a crock.
+
+     The word <STRONG>emssize</STRONG> comes from EMS, that has to do with expanded memory, not
+     extended memory.
+
+
+</PRE>
+<H2>ACKNOWLEDGMENTS</H2><PRE>
+     Guy Helmer, for the floppy sensing code that somehow disappeared into the
+     boot block.
+
+     Earl Chew, for the inspiration his ShoeLace package provided,  unless  he
+     wants  to  file  a  "look  and  feel"  suit against me, then I will say I
+     modeled it after the SunOS ROM boot monitor, which is also true.
+
+
+</PRE>
+<H2>AUTHOR</H2><PRE>
+     Kees J. Bot (kjb@cs.vu.nl)
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>
